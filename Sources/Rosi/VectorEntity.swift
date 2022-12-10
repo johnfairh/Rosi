@@ -193,3 +193,21 @@ extension SIMD2<Float> {
         y.clip(to: val.y)
     }
 }
+
+
+extension VectorEntity {
+    func addCircle(center: SIMD2<Float>, radius: Float, smoothness sides: Int = 16, color: Color2D) {
+        let angle = (Float.pi * 2) / Float(sides)
+
+        var lastPoint: SIMD2<Float> = center + [radius, 0]
+
+        for i in 1...Int(sides) {
+            let thisAngle = angle * Float(i)
+            let cosA = cos(thisAngle)
+            let sinA = sin(thisAngle)
+            let thisPoint = center + [radius * cosA, radius * sinA]
+            addLine(xPos0: lastPoint.x, yPos0: lastPoint.y, xPos1: thisPoint.x, yPos1: thisPoint.y, color: color)
+            lastPoint = thisPoint
+        }
+    }
+}

@@ -46,22 +46,7 @@ final class SymbolCel: VectorEntity {
             addLine(xPos0: from.x, yPos0: from.y, xPos1: to.x, yPos1: to.y, color: color)
         }
 
-        // fuck me
-        let sides = 16
-        let angle = (Float.pi * 2) / Float(sides)
-        let radius = scale * 1
-        let center: SIMD2<Float> = [10, 31] * scale
-
-        var lastPoint: SIMD2<Float> = center + [radius, 0]
-
-        for i in 1...Int(sides) {
-            let thisAngle = angle * Float(i)
-            let cosA = cos(thisAngle)
-            let sinA = sin(thisAngle)
-            let thisPoint = center + [radius * cosA, radius * sinA]
-            addLine(xPos0: lastPoint.x, yPos0: lastPoint.y, xPos1: thisPoint.x, yPos1: thisPoint.y, color: color)
-            lastPoint = thisPoint
-        }
+        addCircle(center: [10, 31] * scale, radius: 1 * scale, color: color)
     }
 
     var boundingBox: SIMD2<Float> {

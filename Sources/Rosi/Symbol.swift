@@ -44,8 +44,8 @@ struct SymbolData {
 typealias SymbolTable = Dictionary<Symbol, SymbolData>
 
 extension SymbolTable {
-    static func load() -> SymbolTable {
-        return [:]
+    static func load() -> (SymbolTable, Int) {
+        return ([:], 1)
     }
 
     static func save() {

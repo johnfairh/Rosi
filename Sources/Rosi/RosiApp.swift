@@ -26,7 +26,6 @@ struct RosiApp: App {
     var body: some Scene {
         WindowGroup {
             MetalEngineView() { engine in
-                engine.setBackgroundColor(.rgb(0.3, 0.3, 0.3))
                 RosiApp.instance = Rosi(engine: engine)
             } frame: { _ in
                 RosiApp.instance?.runFrame()

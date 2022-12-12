@@ -73,10 +73,49 @@ final class SymbolCel: VectorEntity {
         }
     }
 
+    /// Hit-tester for clicking strokes
+    func getStrokeClick() -> Int? {
+        guard let clickPos = engine.getMouseClick() else {
+            return nil
+        }
+        // normalize click to unscaled coords
+        let pos = (clickPos - pos) / scale
+
+        for s in 0..<strokes.count {
+            if pos.closenessTo(line: strokes[s]) < 2 {
+                return s
+            }
+        }
+        // hard-code the order diacritic
+        if pos.y > 30 {
+            return SymbolCel.ORDER_DIACRITIC_STROKE
+        }
+        return nil
+    }
+
     /// Helper
     func add(line: (SIMD2<Float>, SIMD2<Float>)) {
         let from = line.0 * scale
         let to = line.1 * scale
         addLine(xPos0: from.x, yPos0: from.y, xPos1: to.x, yPos1: to.y, color: color)
+    }
+}
+
+extension SIMD2<Float> {
+    // Learnt a lot about how not to model this kind of thing!! Yikes.
+    func closenessTo(line: (Self, Self)) -> Scalar {
+        let maxY, minY: Float
+        if line.0.y > line.1.y {
+            maxY = line.0.y; minY = line.1.y
+        } else {
+            maxY = line.1.y; minY = line.0.y
+        }
+        guard y >= minY && y <= maxY else {
+            return 100
+        }
+        let num = abs((line.1.x - line.0.x)*(line.0.y - y) -
+                      (line.0.x - x)*(line.1.y - line.0.y))
+        let denom = simd_distance(line.0, line.1)
+        return num / denom
     }
 }

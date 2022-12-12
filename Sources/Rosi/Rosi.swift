@@ -43,28 +43,25 @@ final class Rosi {
 
     func runFrame() {
         // get mouse symbol event from symbolCel
-        handleKeys() // get key input and update state
-        symbolCel.set(symbol: currentSymbol) // propagate updated state
-        render() // draw it
-    }
-
-    func handleKeys() {
-        handleStrokeKeys()
+        let strokeClick = symbolCel.getStrokeClick()
+        handleStrokeKeys(click: strokeClick) // get key input and update state
         if handleTextKeys() {
             // update DB with symbol + symboldata
             symbolTable.save()
         }
+        symbolCel.set(symbol: currentSymbol) // propagate updated state
+        render() // draw it
     }
 
     /// Stroke setting
-    func handleStrokeKeys() {
+    func handleStrokeKeys(click: Int?) {
         let strokeKeys = [
             "1", "2", "3", "4", "5", "6", "7",
             "A", "B", "C", "D", "E", "F", "."
         ].map { VirtualKey.printable($0) }
 
         for k in 0..<strokeKeys.count {
-            guard keySampler.isKeyDown(strokeKeys[k]) else {
+            guard keySampler.isKeyDown(strokeKeys[k]) || click == k else {
                 continue
             }
             currentSymbol.toggle(stroke: k)

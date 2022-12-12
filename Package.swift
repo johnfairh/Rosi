@@ -9,7 +9,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/johnfairh/TMLEngines",
-             from: "1.2.0")
+             from: "1.3.0")
   ],
   targets: [
     .executableTarget(

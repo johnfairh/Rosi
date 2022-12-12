@@ -48,7 +48,7 @@ extension SymbolTable {
         return ([:], 1)
     }
 
-    static func save() {
+    func save() {
         // ...
     }
 }

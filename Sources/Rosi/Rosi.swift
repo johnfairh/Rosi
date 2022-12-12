@@ -16,6 +16,7 @@ final class Rosi {
     let font: Font2D
     let font2: Font2D
     let symbolCel: SymbolCel
+    private var keySampler: KeySampler
 
     private var symbolTable: SymbolTable
     private var nextSymbolID: Int
@@ -25,6 +26,7 @@ final class Rosi {
 
     init(engine: Engine2D) {
         self.engine = engine
+        self.keySampler = KeySampler(engine: engine)
         engine.setBackgroundColor(.background)
 
         font = engine.createFont(style: .proportional, weight: .medium, height: 24)
@@ -44,6 +46,43 @@ final class Rosi {
         handleKeys() // get key input and update state
         symbolCel.set(symbol: currentSymbol) // propagate updated state
         render() // draw it
+    }
+
+    func handleKeys() {
+        // ** get stroke keypress **
+        // call toggle on symbol.stroke (our local struct)
+        // set symbol.stroke into symbolcel
+        //
+        // look up new symbol in db
+        // if found, update symboldata (source of text)
+        // if not found, symboldata = nil
+        //
+        // ** get text keypress **
+
+        if handleTextKeys() {
+            // update DB with symbol + symboldata -- in memory and save it
+            symbolTable.save()
+        }
+    }
+
+    /// Text-setting
+    func handleTextKeys() -> Bool {
+        let textKeys = ["T", "U", "V"].map { VirtualKey.printable($0) }
+
+        for k in 0..<textKeys.count {
+            guard keySampler.isKeyDown(textKeys[k]) else {
+                continue
+            }
+            // if symboldata nil, allocate it and assign ID
+            if currentSymbolData == nil {
+                currentSymbolData = SymbolData(id: nextSymbolID)
+                nextSymbolID += 1
+            }
+            currentSymbolData!.set(textId: k, to: RosiApp.getText(prompt: "Text \(k+1)"))
+            symbolTable[currentSymbol] = currentSymbolData!
+            return true
+        }
+        return false
     }
 
     func render() {
@@ -73,21 +112,36 @@ final class Rosi {
                         align: .right, valign: .top)
     }
 
-    func handleKeys() {
-        // maintain symbol (always set) & symboldata (can be nil)
-        //
-        // ** get stroke keypress **
-        // call toggle on symbol.stroke (our local struct)
-        // set symbol.stroke into symbolcel
-        //
-        // look up new symbol in db
-        // if found, update symboldata (source of text)
-        // if not found, symboldata = nil
-        //
-        // ** get text keypress **
-        // if symboldata nil, allocate it and assign ID
-        // get new text from alert hack
-        // update symboldata
-        // update DB with symbol + symboldata -- in memory and save it
+}
+
+/// Helper to debounce keypress events
+struct KeySampler {
+    let engine: Engine2D
+    let debounce: TickSource.TickCount
+    private var keys: [VirtualKey: TickSource.TickCount]
+
+    /// Wrap a predicate so it returns `true` only once every `debounce` milliseconds
+    init(engine: Engine2D, debounce: TickSource.TickCount = 250) {
+        self.engine = engine
+        self.debounce = debounce
+        self.keys = [:]
+    }
+
+    mutating func isKeyDown(_ key: VirtualKey) -> Bool {
+        let now = engine.currentTickCount
+
+        if let lastTime = keys[key],
+           now.isShorterThan(debounce, since: lastTime) {
+            // don't care if actually down
+            return false
+        }
+
+        guard engine.isKeyDown(key) else {
+            keys[key] = nil
+            return false
+        }
+
+        keys[key] = now
+        return true
     }
 }

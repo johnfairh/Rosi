@@ -24,7 +24,7 @@ struct Symbol: Codable, Hashable {
     }
 }
 
-struct SymbolData {
+struct SymbolData: Codable {
     let id: Int
     private(set) var text: [String]
 
@@ -43,12 +43,45 @@ struct SymbolData {
 
 typealias SymbolTable = Dictionary<Symbol, SymbolData>
 
+import Foundation
+
 extension SymbolTable {
+    static var dbDirectory: URL {
+        FileManager.default.homeDirectoryForCurrentUser
+    }
+
+    static var dbURL: URL {
+        dbDirectory.appendingPathComponent("rosi.json")
+    }
+
+    static var dbBackupURL: URL {
+        dbDirectory.appendingPathComponent("rosi.backup.json")
+    }
+
     static func load() -> (SymbolTable, Int) {
-        return ([:], 1)
+        do {
+            try? FileManager.default.removeItem(at: dbBackupURL)
+            try FileManager.default.copyItem(at: dbURL, to: dbBackupURL)
+        } catch {
+            print("Couldn't back up symbols: \(error)")
+        }
+
+        do {
+            let json = try Data(contentsOf: dbURL)
+            let decoder = JSONDecoder()
+            let symbols = try decoder.decode(SymbolTable.self, from: json)
+            print("Restored \(symbols.count) symbols")
+            return (symbols, symbols.count + 1)
+        } catch {
+            print("Couldn't restore symbols: \(error)")
+            return ([:], 1)
+        }
     }
 
     func save() {
-        // ...
+        let encoder = JSONEncoder()
+        let json = try! encoder.encode(self)
+        try! json.write(to: Self.dbURL)
+        print("Wrote \(self.count) symbols")
     }
 }

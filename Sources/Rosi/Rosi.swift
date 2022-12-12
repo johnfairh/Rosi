@@ -38,7 +38,7 @@ final class Rosi {
         (symbolTable, nextSymbolID) = SymbolTable.load()
 
         currentSymbol = Symbol()
-        currentSymbolData = nil
+        currentSymbolData = symbolTable[currentSymbol]
     }
 
     func runFrame() {
@@ -49,20 +49,19 @@ final class Rosi {
     }
 
     func handleKeys() {
-        if handleStrokeKeys() || handleTextKeys() {
+        handleStrokeKeys()
+        if handleTextKeys() {
             // update DB with symbol + symboldata
             symbolTable.save()
         }
     }
 
     /// Stroke setting
-    func handleStrokeKeys() -> Bool {
+    func handleStrokeKeys() {
         let strokeKeys = [
             "1", "2", "3", "4", "5", "6", "7",
             "A", "B", "C", "D", "E", "F", "."
         ].map { VirtualKey.printable($0) }
-
-        var changed = false
 
         for k in 0..<strokeKeys.count {
             guard keySampler.isKeyDown(strokeKeys[k]) else {
@@ -72,11 +71,9 @@ final class Rosi {
             symbolCel.set(symbol: currentSymbol)
             // look up new symbol in db
             // if found, update symboldata (source of text)
-            // if not found, symboldata = nil (working on defining sthg)
+            // if not found, symboldata = nil (working on defining a symbol)
             currentSymbolData = symbolTable[currentSymbol]
-            changed = (currentSymbolData != nil)
         }
-        return changed
     }
 
     /// Text-setting
@@ -99,6 +96,7 @@ final class Rosi {
         return false
     }
 
+    /// Draw current state
     func render() {
         symbolCel.render()
 

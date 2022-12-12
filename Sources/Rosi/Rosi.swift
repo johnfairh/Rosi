@@ -49,20 +49,34 @@ final class Rosi {
     }
 
     func handleKeys() {
-        // ** get stroke keypress **
-        // call toggle on symbol.stroke (our local struct)
-        // set symbol.stroke into symbolcel
-        //
-        // look up new symbol in db
-        // if found, update symboldata (source of text)
-        // if not found, symboldata = nil
-        //
-        // ** get text keypress **
-
-        if handleTextKeys() {
-            // update DB with symbol + symboldata -- in memory and save it
+        if handleStrokeKeys() || handleTextKeys() {
+            // update DB with symbol + symboldata
             symbolTable.save()
         }
+    }
+
+    /// Stroke setting
+    func handleStrokeKeys() -> Bool {
+        let strokeKeys = [
+            "1", "2", "3", "4", "5", "6", "7",
+            "A", "B", "C", "D", "E", "F", "."
+        ].map { VirtualKey.printable($0) }
+
+        var changed = false
+
+        for k in 0..<strokeKeys.count {
+            guard keySampler.isKeyDown(strokeKeys[k]) else {
+                continue
+            }
+            currentSymbol.toggle(stroke: k)
+            symbolCel.set(symbol: currentSymbol)
+            // look up new symbol in db
+            // if found, update symboldata (source of text)
+            // if not found, symboldata = nil (working on defining sthg)
+            currentSymbolData = symbolTable[currentSymbol]
+            changed = (currentSymbolData != nil)
+        }
+        return changed
     }
 
     /// Text-setting

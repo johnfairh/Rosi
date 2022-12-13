@@ -71,7 +71,12 @@ extension SymbolTable {
             let decoder = JSONDecoder()
             let symbols = try decoder.decode(SymbolTable.self, from: json)
             print("Restored \(symbols.count) symbols")
-            return (symbols, symbols.count + 1)
+
+            let maxID = symbols.values.reduce(0) { cur, next in
+                Swift.max(cur, next.id)
+            }
+            print("Max ID is \(maxID)")
+            return (symbols, maxID + 1)
         } catch {
             print("Couldn't restore symbols: \(error)")
             return ([:], 1)

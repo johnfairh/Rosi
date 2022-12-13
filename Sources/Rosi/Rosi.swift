@@ -45,7 +45,7 @@ final class Rosi {
         // get mouse symbol event from symbolCel
         let strokeClick = symbolCel.getStrokeClick()
         handleStrokeKeys(click: strokeClick) // get key input and update state
-        if handleTextKeys() {
+        if handleTextKeys() || handleMiscKeys() {
             // update DB with symbol + symboldata
             symbolTable.save()
         }
@@ -65,12 +65,16 @@ final class Rosi {
                 continue
             }
             currentSymbol.toggle(stroke: k)
-            symbolCel.set(symbol: currentSymbol)
-            // look up new symbol in db
-            // if found, update symboldata (source of text)
-            // if not found, symboldata = nil (working on defining a symbol)
-            currentSymbolData = symbolTable[currentSymbol]
         }
+
+        if keySampler.isKeyDown(.printable("X")) {
+            currentSymbol = Symbol()
+        }
+
+        // look up new symbol in db
+        // if found, update symboldata (source of text)
+        // if not found, symboldata = nil (working on defining a symbol)
+        currentSymbolData = symbolTable[currentSymbol]
     }
 
     /// Text-setting
@@ -88,6 +92,16 @@ final class Rosi {
             }
             currentSymbolData!.set(textId: k, to: RosiApp.getText(prompt: "Text \(k+1)"))
             symbolTable[currentSymbol] = currentSymbolData!
+            return true
+        }
+        return false
+    }
+
+    /// Unclearly categorized leftovers
+    func handleMiscKeys() -> Bool {
+        if keySampler.isKeyDown(.backspace) {
+            symbolTable[currentSymbol] = nil
+            currentSymbolData = nil
             return true
         }
         return false
@@ -115,7 +129,7 @@ final class Rosi {
                         x: textX, y: textY, width: textWidth, height: textHeight + 10,
                         align: .right, valign: .bottom)
 
-        let instructions = "1-7, a-f, ., tuv"
+        let instructions = "1-7, a-f, ., tuv, x"
         engine.drawText(instructions, font: font2, color: .foreground,
                         x: textX, y: textY, width: textWidth, height: textHeight + 10,
                         align: .right, valign: .top)

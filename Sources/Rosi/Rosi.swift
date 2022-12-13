@@ -90,7 +90,7 @@ final class Rosi {
                 currentSymbolData = SymbolData(id: nextSymbolID)
                 nextSymbolID += 1
             }
-            currentSymbolData!.set(textId: k, to: RosiApp.getText(prompt: "Text \(k+1)"))
+            currentSymbolData!.set(textId: k, to: RosiApp.getText(prompt: "Text \(k+1)", current: currentSymbolData!.text[k]))
             symbolTable[currentSymbol] = currentSymbolData!
             return true
         }

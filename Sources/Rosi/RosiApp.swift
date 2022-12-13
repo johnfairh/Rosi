@@ -35,14 +35,14 @@ struct RosiApp: App {
 
     /// Hack to get text, can't quickly figure out how to manage focus in SwiftUI with an NSViewRepresentable,
     /// needs more thoughtful responder-chain management than I can spare.
-    static func getText(prompt: String = "?") -> String {
+    static func getText(prompt: String = "?", current: String = "") -> String {
         let msg = NSAlert()
         msg.alertStyle = .informational
         msg.addButton(withTitle: "OK")
         msg.messageText = prompt
 
         let txt = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
-        txt.stringValue = ""
+        txt.stringValue = current
 
         msg.accessoryView = txt
         msg.window.initialFirstResponder = txt

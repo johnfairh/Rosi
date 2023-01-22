@@ -7,19 +7,10 @@
 
 import SwiftUI
 import MetalEngine
-import Dispatch
 
 @main
 struct RosiApp: App {
-    init() {
-        // Some nonsense to make the app work properly when run from the CLI.
-        // We are before `NSApplicationMain` here so queue it.
-        DispatchQueue.main.async {
-            NSApp.setActivationPolicy(.regular)
-            NSApp.activate(ignoringOtherApps: true)
-            NSApp.windows.first?.makeKeyAndOrderFront(nil)
-        }
-    }
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     static var instance: Rosi?
 
@@ -48,5 +39,14 @@ struct RosiApp: App {
         msg.window.initialFirstResponder = txt
         _ = msg.runModal()
         return txt.stringValue
+    }
+}
+
+/// Get the app working properly when `swift run`
+class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.windows.first?.makeKeyAndOrderFront(nil)
     }
 }
